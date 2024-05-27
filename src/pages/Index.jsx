@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, Heading, HStack, Image, Link, SimpleGrid, Text, VStack, Input } from "@chakra-ui/react";
+import { Box, Button, Container, Flex, Heading, HStack, Image, Link, SimpleGrid, Text, VStack, Input, Select } from "@chakra-ui/react";
 import { useState } from "react";
 import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
 
@@ -7,27 +7,32 @@ const sampleProducts = [
     id: 1,
     name: "Smartphone",
     description: "Latest model with advanced features",
-    price: "$699",
+    price: 699,
+    category: "smartphone",
     image: "https://via.placeholder.com/150"
   },
   {
     id: 2,
     name: "Laptop",
     description: "High performance laptop for professionals",
-    price: "$999",
+    price: 999,
+    category: "laptop",
     image: "https://via.placeholder.com/150"
   },
   {
     id: 3,
     name: "Smartwatch",
     description: "Stay connected on the go",
-    price: "$199",
+    price: 199,
+    category: "smartwatch",
     image: "https://via.placeholder.com/150"
   }
 ];
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [priceRange, setPriceRange] = useState([0, 1000]);
   const [filteredProducts, setFilteredProducts] = useState(sampleProducts);
 
   const handleSearchChange = (event) => {
@@ -35,11 +40,23 @@ const Index = () => {
     setSearchQuery(query);
     setFilteredProducts(
       sampleProducts.filter(product =>
-        product.name.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query)
+        (product.name.toLowerCase().includes(query) ||
+         product.description.toLowerCase().includes(query)) &&
+        (category === "" || product.category === category) &&
+        (product.price >= priceRange[0] && product.price <= priceRange[1])
       )
     );
   };
+
+  const handleCategoryChange = (event) => {
+    setCategory(event.target.value);
+  };
+
+  const handlePriceRangeChange = (event) => {
+    const value = event.target.value.split("-");
+    setPriceRange([parseInt(value[0]), parseInt(value[1])]);
+  };
+
   return (
     <Container maxW="container.xl" p={0}>
       {/* Navigation Bar */}
@@ -68,6 +85,23 @@ const Index = () => {
         <Button colorScheme="teal" size="lg">Shop Now</Button>
       </Box>
 
+      {/* Filter Section */}
+      <Box py={4}>
+        <Heading size="md" mb={4}>Filter Products</Heading>
+        <HStack spacing={4}>
+          <Select placeholder="Select category" onChange={handleCategoryChange}>
+            <option value="smartphone">Smartphone</option>
+            <option value="laptop">Laptop</option>
+            <option value="smartwatch">Smartwatch</option>
+          </Select>
+          <Select placeholder="Select price range" onChange={handlePriceRangeChange}>
+            <option value="0-200">$0 - $200</option>
+            <option value="200-500">$200 - $500</option>
+            <option value="500-1000">$500 - $1000</option>
+          </Select>
+        </HStack>
+      </Box>
+
       {/* Products Section */}
       <Box py={10}>
         <Heading textAlign="center" mb={8}>Featured Products</Heading>
@@ -77,7 +111,7 @@ const Index = () => {
               <Image src={product.image} alt={product.name} mb={4} />
               <Heading size="md" mb={2}>{product.name}</Heading>
               <Text mb={2}>{product.description}</Text>
-              <Text fontWeight="bold">{product.price}</Text>
+              <Text fontWeight="bold">${product.price}</Text>
             </Box>
           ))}
         </SimpleGrid>
