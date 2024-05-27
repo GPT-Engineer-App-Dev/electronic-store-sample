@@ -7,21 +7,24 @@ const sampleProducts = [
     id: 1,
     name: "Smartphone",
     description: "Latest model with advanced features",
-    price: "$699",
+    price: 699,
+    category: "smartphone",
     image: "https://via.placeholder.com/150"
   },
   {
     id: 2,
     name: "Laptop",
     description: "High performance laptop for professionals",
-    price: "$999",
+    price: 999,
+    category: "laptop",
     image: "https://via.placeholder.com/150"
   },
   {
     id: 3,
     name: "Smartwatch",
     description: "Stay connected on the go",
-    price: "$199",
+    price: 199,
+    category: "smartwatch",
     image: "https://via.placeholder.com/150"
   }
 ];
@@ -29,17 +32,32 @@ const sampleProducts = [
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(sampleProducts);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [priceRange, setPriceRange] = useState([0, 1000]);
 
   const handleSearchChange = (event) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
     setFilteredProducts(
       sampleProducts.filter(product =>
-        product.name.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query)
+        (selectedCategory === "" || product.category === selectedCategory) &&
+        product.price >= priceRange[0] &&
+        product.price <= priceRange[1] &&
+        (product.name.toLowerCase().includes(query) ||
+         product.description.toLowerCase().includes(query))
       )
     );
   };
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
+  const handlePriceRangeChange = (event) => {
+    const value = event.target.value.split(",");
+    setPriceRange([parseInt(value[0]), parseInt(value[1])]);
+  };
+
   return (
     <Container maxW="container.xl" p={0}>
       {/* Navigation Bar */}
@@ -66,6 +84,27 @@ const Index = () => {
         <Heading size="2xl" mb={4}>Welcome to ElectroShop</Heading>
         <Text fontSize="xl" mb={6}>Your one-stop shop for the latest electronics</Text>
         <Button colorScheme="teal" size="lg">Shop Now</Button>
+      </Box>
+
+      {/* Filter Section */}
+      <Box py={10}>
+        <Heading textAlign="center" mb={8}>Filter Products</Heading>
+        <Flex justifyContent="center" mb={8}>
+          <Select placeholder="Select category" onChange={handleCategoryChange} value={selectedCategory}>
+            <option value="smartphone">Smartphone</option>
+            <option value="laptop">Laptop</option>
+            <option value="smartwatch">Smartwatch</option>
+          </Select>
+          <Input
+            type="range"
+            min="0"
+            max="1000"
+            step="50"
+            onChange={handlePriceRangeChange}
+            value={priceRange.join(",")}
+          />
+          <Text ml={4}>${priceRange[0]} - ${priceRange[1]}</Text>
+        </Flex>
       </Box>
 
       {/* Products Section */}
